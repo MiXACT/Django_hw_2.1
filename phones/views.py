@@ -8,7 +8,11 @@ def index(request):
 
 
 def show_catalog(request):
-    phone_obj = Phone.objects.all()
+    sorting = sort_phones_check(request)
+    if sorting:
+        phone_obj = Phone.objects.all().order_by(sorting)
+    else:
+        phone_obj = Phone.objects.all()
     template = 'catalog.html'
     phone_dict = {}
     for phone in phone_obj:
@@ -22,7 +26,6 @@ def show_catalog(request):
         }
     context = {'phones': phone_dict}
     return render(request, template, context)
-
 
 def show_product(request, slug):
     phone_obj = Phone.objects.filter(slug=slug)
@@ -38,3 +41,17 @@ def show_product(request, slug):
         }
     context = {'phone': phone_dict}
     return render(request, template, context)
+
+def sort_phones_check(request):
+    sort_var = request.GET.get('sort')
+    if not sort_var:
+        return False
+    elif sort_var == 'min_price':
+        order_rule = 'price'
+    elif sort_var == 'max_price':
+        order_rule = '-price'
+    elif sort_var == 'name':
+        order_rule = 'name'
+    return order_rule
+
+
